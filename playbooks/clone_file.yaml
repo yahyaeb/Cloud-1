@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  remote_user: yahia
+
+  roles:
+    - geerlingguy.docker
+
+  tasks:
+    - name: Configure UFW rules
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - 22
+        - 80
+        - 443
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+
+    - name: Install make
+      ansible.builtin.apt:
+        name: make
+        state: present
+        update_cache: yes
+
+    - name: Clone Inception repo
+      ansible.builtin.git:
+        repo: 'https://github.com/yahyaeb/Inception.git'
+        dest: /home/yahia/Inception
+        version: main
+
+    - name: Run make
+      community.general.make:
+        chdir: /home/yahia/Inception
