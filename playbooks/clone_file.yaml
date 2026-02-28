@@ -21,18 +21,42 @@
       community.general.ufw:
         state: enabled
 
-    - name: Install make
+    - name: Install make 
       ansible.builtin.apt:
         name: make
         state: present
         update_cache: yes
+      register: apt_make
+      retries: 10
+      delay: 6
+      until: apt_make is succeeded
 
-    - name: Clone Inception repo
+    - name: Clone Inception repo (retry on GitHub/network issues)
       ansible.builtin.git:
-        repo: 'https://github.com/yahyaeb/Inception.git'
+        repo: "https://github.com/yahyaeb/Inception.git"
         dest: /home/yahia/Inception
         version: main
+        force: yes
+      register: git_clone
+      retries: 8
+      delay: 5
+      until: git_clone is succeeded
 
     - name: Run make
       community.general.make:
         chdir: /home/yahia/Inception
+      register: make_run
+      retries: 5
+      delay: 8
+      until: make_run is succeeded
+
+    - name: Wait for nginx/HTTPS to be reachable
+      ansible.builtin.uri:
+        url: "https://{{ inventory_hostname }}/"
+        method: GET
+        validate_certs: false
+        status_code: [200, 301, 302]
+      register: web
+      retries: 30
+      delay: 3
+      until: web.status in [200, 301, 302]
