@@ -1,0 +1,72 @@
+services:
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ${DATA_DIR:-./data}/mariadb:/var/lib/mysql
+    networks: [wpnet]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "--protocol=SOCKET", "--socket=/run/mysqld/mysqld.sock", "ping", "--silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  wordpress-fpm:
+    container_name: wordpress
+    build: ./requirements/wordpress
+    env_file: [.env]
+    environment:
+      DB_HOST: mariadb
+      WORDPRESS_DB_HOST: mariadb
+    volumes:
+      - ${DATA_DIR:-./data}/wordpress:/var/www/html
+    expose:
+      - "9000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks: [wpnet]
+    healthcheck:
+      test: ["CMD", "php", "-r", "echo fsockopen('127.0.0.1', 9000) ? 'OK' : 'FAIL';"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: always
+
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx
+    restart: always
+    ports:
+      - "443:443"
+    environment:
+      NGINX_DOMAIN: cloud1.yahia-cloudonline.xyz
+    volumes:
+      - ${DATA_DIR:-./data}/wordpress:/var/www/html:ro
+      - ${DATA_DIR:-./data}/nginx:/etc/nginx/ssl
+    depends_on:
+      wordpress-fpm:
+        condition: service_healthy
+    networks: [wpnet]
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks: [wpnet]
+
+networks:
+  wpnet:
