@@ -31,20 +31,31 @@
       delay: 6
       until: apt_make is succeeded
 
-    - name: Clone Inception repo (retry on GitHub/network issues)
-      ansible.builtin.git:
-        repo: "https://github.com/yahyaeb/Inception.git"
-        dest: /home/yahia/Inception
-        version: main
-        force: yes
-      register: git_clone
-      retries: 8
-      delay: 5
-      until: git_clone is succeeded
+    - name: Sync cloud1_dev to server
+      become: false
+      ansible.posix.synchronize:
+        src: "./cloud1_dev/"
+        dest: "/home/yahia/cloud1_dev/"
+        recursive: yes
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+          # - "--exclude=data"
+
+    # - name: Clone Inception repo (retry on GitHub/network issues)
+    #   ansible.builtin.git:
+    #     repo: "https://github.com/yahyaeb/Inception.git"
+    #     dest: /home/yahia/Inception
+    #     version: main
+    #     force: yes
+    #   register: git_clone
+    #   retries: 8
+    #   delay: 5
+    #   until: git_clone is succeeded
 
     - name: Run make
       community.general.make:
-        chdir: /home/yahia/Inception
+        chdir: "/home/yahia/cloud1_dev/"
       register: make_run
       retries: 5
       delay: 8
