@@ -59,13 +59,13 @@
         state: present
         update_cache: yes
 
-    - name: Find shell scripts in cloud1_dev
-      ansible.builtin.find:
-        paths: "/home/yahia/cloud1_dev"
-        patterns: "*.sh"
-        file_type: file
-        recurse: yes
-      register: shell_scripts
+    # - name: Find shell scripts in cloud1_dev
+    #   ansible.builtin.find:
+    #     paths: "/home/yahia/cloud1_dev"
+    #     patterns: "*.sh"
+    #     file_type: file
+    #     recurse: yes
+    #   register: shell_scripts
 
     - name: Update DOMAIN_NAME to use server IP instead of domain
       ansible.builtin.lineinfile:
