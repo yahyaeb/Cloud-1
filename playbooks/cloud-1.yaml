@@ -2,8 +2,8 @@
   become: true
   remote_user: yahia
 
-  # roles:
-  #   - geerlingguy.docker
+  roles:
+    - geerlingguy.docker
 
   tasks:
 
@@ -54,6 +54,7 @@
         state: enabled
 
     - name: Install make
+      become: yes
       ansible.builtin.apt:
         name: make
         state: present
@@ -79,8 +80,7 @@
         regexp: '^NGINX_DOMAIN='
         line: "NGINX_DOMAIN={{ inventory_hostname }}"
 
-    - name: Run make as yahia
-      become: true
+    - name: Run make
       ansible.builtin.command: make
       args:
         chdir: /home/yahia/cloud1_dev
