@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for run
+    - name: Run make
+      ansible.builtin.command: make
+      args:
+        chdir: /root/cloud1_dev
+      register: make_run
+      retries: 3
+      delay: 10
+      until: make_run is succeeded

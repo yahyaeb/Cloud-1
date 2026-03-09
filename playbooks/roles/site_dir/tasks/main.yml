@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for site_dir
+    - name: Remove existing cloud1_dev directory to fix permissions
+      ansible.builtin.file:
+        path: "/root/cloud1_dev"
+        state: absent
+
+    - name: Create cloud1_dev directory with proper ownership
+      ansible.builtin.file:
+        path: "/root/cloud1_dev"
+        state: directory
+
+    - name: Sync cloud1_dev to server (preserve perms)
+      ansible.posix.synchronize:
+        src: "{{ playbook_dir }}/cloud-1_dev/"
+        dest: "/root/cloud1_dev/"
+        recursive: yes
+        delete: yes

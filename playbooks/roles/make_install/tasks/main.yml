@@ -1,0 +1,8 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for make
+    - name: Install make
+      ansible.builtin.apt:
+        name: make
+        state: present
+        update_cache: yes

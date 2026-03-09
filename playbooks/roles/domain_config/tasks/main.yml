@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for domain.config
+    - name: Update DOMAIN_NAME to use server IP instead of domain
+      ansible.builtin.lineinfile:
+        path: "/root/cloud1_dev/srcs/.env"
+        regexp: '^DOMAIN_NAME='
+        line: "DOMAIN_NAME=https://{{ inventory_hostname }}"
+
+    - name: Update NGINX_DOMAIN to use server IP instead of domain
+      ansible.builtin.lineinfile:
+        path: "/root/cloud1_dev/srcs/.env"
+        regexp: '^NGINX_DOMAIN='
+        line: "NGINX_DOMAIN={{ inventory_hostname }}"

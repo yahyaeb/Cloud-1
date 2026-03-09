@@ -1,94 +1,15 @@
 - hosts: all
-  become: true
-  remote_user: yahia
-
+  remote_user: root
   roles:
     - geerlingguy.docker
+    - site_dir
+    - firewall_config
+    - make_install
+    - domain_config
+    - run_make
+
 
   tasks:
-
-    - name: Remove existing cloud1_dev directory to fix permissions
-      ansible.builtin.file:
-        path: "/home/yahia/cloud1_dev"
-        state: absent
-
-    - name: Create cloud1_dev directory with proper ownership
-      ansible.builtin.file:
-        path: "/home/yahia/cloud1_dev"
-        state: directory
-        owner: yahia
-        group: yahia
-
-    - name: Sync cloud1_dev to server (preserve perms)
-      become: false
-      ansible.posix.synchronize:
-        src: "{{ playbook_dir }}/cloud-1_dev/"
-        dest: "/home/yahia/cloud1_dev/"
-        recursive: yes
-        delete: yes
-        rsync_opts:
-          - "--chmod=Du=rwx,Dgo=rx,Fu=rwX,Fgo=rX"
-
-    - name: Fix ownership of cloud1_dev
-      ansible.builtin.file:
-        path: "/home/yahia/cloud1_dev"
-        owner: yahia
-        group: yahia
-        recurse: yes
-
-    - name: Ensure yahia is in docker group
-      ansible.builtin.user:
-        name: yahia
-        groups: docker
-        append: true
-
-    - name: Configure UFW rules
-      community.general.ufw:
-        rule: allow
-        port: "{{ item }}"
-        proto: tcp
-      loop: [22, 80, 443]
-
-    - name: Enable UFW
-      community.general.ufw:
-        state: enabled
-
-    - name: Install make
-      become: yes
-      ansible.builtin.apt:
-        name: make
-        state: present
-        update_cache: yes
-
-    # - name: Find shell scripts in cloud1_dev
-    #   ansible.builtin.find:
-    #     paths: "/home/yahia/cloud1_dev"
-    #     patterns: "*.sh"
-    #     file_type: file
-    #     recurse: yes
-    #   register: shell_scripts
-
-    - name: Update DOMAIN_NAME to use server IP instead of domain
-      ansible.builtin.lineinfile:
-        path: "/home/yahia/cloud1_dev/srcs/.env"
-        regexp: '^DOMAIN_NAME='
-        line: "DOMAIN_NAME=https://{{ inventory_hostname }}"
-
-    - name: Update NGINX_DOMAIN to use server IP instead of domain
-      ansible.builtin.lineinfile:
-        path: "/home/yahia/cloud1_dev/srcs/.env"
-        regexp: '^NGINX_DOMAIN='
-        line: "NGINX_DOMAIN={{ inventory_hostname }}"
-
-    - name: Run make
-      ansible.builtin.command: make
-      args:
-        chdir: /home/yahia/cloud1_dev
-      register: make_run
-      retries: 3
-      delay: 10
-      until: make_run is succeeded
-
     - name: Wait for nginx/HTTPS to be reachable
       ansible.builtin.uri:
         url: "https://{{ inventory_hostname }}/"
