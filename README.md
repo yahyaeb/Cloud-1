@@ -32,7 +32,8 @@ Before running the playbook, ensure the following:
 
 The deployed stack consists of the following services:
 
-```
+```text
+
 Internet
     │
     ▼
@@ -47,6 +48,7 @@ Cloud VPS
     ├── MariaDB
     │
     └── phpMyAdmin  (accessible at /phpmyadmin)
+
 ```
 
 > ⚠️ **Note on HTTPS:** The stack uses a self-signed TLS certificate. Your browser will display a security warning on first visit — this is expected. You can safely proceed by accepting the warning, or replace the certificate with a valid one (e.g. via Let's Encrypt) once a domain is configured.
@@ -71,7 +73,7 @@ All services are containerized and managed using Docker.
 
 ## Repository Structure
 
-```
+```.
 cloud-1/
 │
 ├── ansible/
