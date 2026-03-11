@@ -145,19 +145,19 @@ Add your server's IP address and SSH user to `ansible/inventory.ini`:
 
 ```ini
 [servers]
-203.0.113.10 ansible_user=yahia
+203.0.113.10
 ```
 
 ### 2. Install Galaxy roles
 
 ```bash
-ansible-galaxy install -r ansible/requirements.yml
+ansible-galaxy install -r requirements.yml
 ```
 
 ### 3. Run the playbook
 
 ```bash
-ansible-playbook -i ansible/inventory.ini ansible/cloud-1.yaml
+ansible-playbook -i inventory.ini cloud-1.yaml
 ```
 
 The playbook will:
